@@ -9,6 +9,24 @@
 
 
 ---------_--__--_------_------
+          Overview
+------------------------------
+
+myWifide is simple IDE for MySQL. It is designed
+to work on Wi-Fi network or single user hosting.
+
+myWifide is ready to use on Testor Gifts such as:
++ Testor Cloud Personal Gift: https://progorker.github.io/sponsor/testor.cloud.personal.html
+  o It is customized myWifide for password protected single user usage
+
++ Testor Cloud Startup Gift: https://progorker.github.io/sponsor/testor.cloud.startup.html
+  o It is customized myWifide for password protected multi users usage
+
++ Testor Progod Personal Gift: https://progorker.github.io/sponsor/testor.progod.personal.html
+  o It is this version of myWifide
+
+
+---------_--__--_------_------
          Screenshots
 ------------------------------
 ```
