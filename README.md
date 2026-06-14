@@ -23,7 +23,7 @@ myWifide is ready to use on Testor Gifts such as:
   o It is customized myWifide for password protected multi users usage
 
 + Testor Progod Personal Gift: https://progorker.github.io/sponsor/testor.progod.personal.html
-  o It is this version of myWifide
+  o It is customized myWifide for single user usage
 
 
 ---------_--__--_------_------
