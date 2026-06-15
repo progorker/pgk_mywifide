@@ -1,6 +1,14 @@
 <?php
 /*
- * =====] Following functions has license as [=====
+ * =====] jQuery on client side has license as       ]=====
+ *
+ * + License: MIT
+ * 
+ * + License URL: https://jquery.com/license/
+ *
+ * ========================================================
+ *
+ * =====] Following PHP functions has license as [=========
  *
  * + check_http_headers_for_mobile()
  * + g_match(string $regex, string $userAgent)
@@ -16,9 +24,9 @@
  *
  * + Source URL: https://github.com/serbanghita/Mobile-Detect
  *
- * =============================================
+ * ========================================================
  *
- * =====] Other functions has license as  [=====
+ * =====] Other PHP, HTML & CSS codes has license as [=====
  *
  * Copyright (c) 2026 Dinh Thoai Tran <zinospetrel@sdf.org>
  * All rights reserved.
@@ -27,7 +35,7 @@
  *
  * + License: GPL-2.0
  *
- * =============================================
+ * ========================================================
  */
 
 require_once __DIR__ . '/mobile_detect.php';
