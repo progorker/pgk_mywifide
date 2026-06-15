@@ -250,10 +250,10 @@ function g_resize() {
 
 function g_refine( sql ) {
   let nsql = "\n" + sql + "\n";
-  if ( nsql.indexOf( "\nupload" ) >= 0 || nsql.indexOf( " upload" ) >= 0 ) {
+  if ( nsql.indexOf( "\n-- upload" ) >= 0 || nsql.indexOf( " -- upload" ) >= 0 ) {
     $('#dtt-file').val('');
     g_show_page('u');
-    sql = sql.replaceAll( 'upload', '-- _upload_ --' );
+    sql = sql.replaceAll( '-- upload', '-- _upload_ --' );
   }
   return sql;
 }
@@ -308,40 +308,40 @@ function g_execute() {
                  Help
 ------------------------------------------
 
-+-----------+----------+-----------------------------------------------------------------------------------------------------+
-| command   | shortcut | description                                                                                         |
-+-----------+----------+-----------------------------------------------------------------------------------------------------+
-| ?         | (\?)     | Synonym for `help'.                                                                                 |
-| charset   | (\C)     | Switch to another charset. Might be needed for processing binlog with multi-byte charsets.          |
-| clear     | (\c)     | Clear the current input statement.                                                                  |
-| connect   | (\r)     | Reconnect to the server. Optional arguments are db and host.                                        |
-| delimiter | (\d)     | Set statement delimiter.                                                                            |
-| ego       | (\G)     | Send command to MariaDB server, display result vertically.                                          |
-| exit      | (\q)     | Exit mysql. Same as quit.                                                                           |
-| go        | (\g)     |  Send command to MariaDB server.                                                                    |
-| help      | (\h)     | Display this help.                                                                                  |
-| nopager   | (\n)     | Disable pager, print to stdout.                                                                     |
-| nowarning | (\w)     | Don't show warnings after every statement.                                                          |
-| pager     | (\P)     | Set PAGER [to_pager]. Print the query results via PAGER.                                            |
-| print     | (\p)     | Print current command.                                                                              |
-| prompt    |  (\R)    | Change your mysql prompt.                                                                           |
-| quit      | (\q)     | Quit mysql.                                                                                         |
-| costs     | (\Q)     | Toggle showing query costs after each query                                                         |
-| source    | (\.)     | Execute an SQL script file. Takes a file name as an argument.                                       |
-| status    | (\s)     | Get status information from the server.                                                             |
-| use       | (\u)     | Use another database. Takes database name as argument.                                              |
-| warnings  | (\W)     | Show warnings after every statement.                                                                |
-| pattern   |          | Get code pattern from myTestor.                                                                     |
-| workdir   |          | Set work dir. Argument is selected directory.                                                       |
-| upload    |          | Upload zip file.                                                                                    |
-| download  |          | Zip folder & download zip file. Argument is relative path.                                          |
-| load      |          | Load script file into script editor. Argument is relative path.                                     |
-| list      |          | List buffer directory. Argument is relative path.                                                   |
-| remove    |          | Remove file. Argument is relative path.                                                             |
-| save      |          | Save previous code to file. Does not execute script. Argument is relative path.                     |
-| cat       |          | Display script file. Does not execute script. Argument is relative path.                            |
-| open      | (\o)     | Open remote database. Arguments are host, port, username, password, database. Execute below script. |
-+-----------+----------+-----------------------------------------------------------------------------------------------------+
++--------------+----------+-----------------------------------------------------------------------------------------------------+
+| command      | shortcut | description                                                                                         |
++--------------+----------+-----------------------------------------------------------------------------------------------------+
+| ?            | (\?)     | Synonym for `help'.                                                                                 |
+| charset      | (\C)     | Switch to another charset. Might be needed for processing binlog with multi-byte charsets.          |
+| clear        | (\c)     | Clear the current input statement.                                                                  |
+| connect      | (\r)     | Reconnect to the server. Optional arguments are db and host.                                        |
+| delimiter    | (\d)     | Set statement delimiter.                                                                            |
+| ego          | (\G)     | Send command to MariaDB server, display result vertically.                                          |
+| exit         | (\q)     | Exit mysql. Same as quit.                                                                           |
+| go           | (\g)     |  Send command to MariaDB server.                                                                    |
+| help         | (\h)     | Display this help.                                                                                  |
+| nopager      | (\n)     | Disable pager, print to stdout.                                                                     |
+| nowarning    | (\w)     | Don't show warnings after every statement.                                                          |
+| pager        | (\P)     | Set PAGER [to_pager]. Print the query results via PAGER.                                            |
+| print        | (\p)     | Print current command.                                                                              |
+| prompt       |  (\R)    | Change your mysql prompt.                                                                           |
+| quit         | (\q)     | Quit mysql.                                                                                         |
+| costs        | (\Q)     | Toggle showing query costs after each query                                                         |
+| source       | (\.)     | Execute an SQL script file. Takes a file name as an argument.                                       |
+| status       | (\s)     | Get status information from the server.                                                             |
+| use          | (\u)     | Use another database. Takes database name as argument.                                              |
+| warnings     | (\W)     | Show warnings after every statement.                                                                |
+| -- pattern   |          | Get code pattern from myTestor.                                                                     |
+| -- workdir   |          | Set work dir. Argument is selected directory.                                                       |
+| -- upload    |          | Upload zip file.                                                                                    |
+| -- download  |          | Zip folder & download zip file. Argument is relative path.                                          |
+| -- load      |          | Load script file into script editor. Argument is relative path.                                     |
+| -- list      |          | List buffer directory. Argument is relative path.                                                   |
+| -- remove    |          | Remove file. Argument is relative path.                                                             |
+| -- save      |          | Save previous code to file. Does not execute script. Argument is relative path.                     |
+| -- cat       |          | Display script file. Does not execute script. Argument is relative path.                            |
+| -- open      | (-- \o)  | Open remote database. Arguments are host, port, username, password, database. Execute below script. |
++--------------+----------+-----------------------------------------------------------------------------------------------------+
 
   </div></div>
   </div>
