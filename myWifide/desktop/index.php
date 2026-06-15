@@ -38,6 +38,18 @@
  * ========================================================
  */
 
+session_start();
+global $g_config, $g_unlocked_str, $g_token;
+require_once __DIR__ . '/../config.php';
+$g_token = uniqid();
+
+$g_unlocked_str = 'true';
+$_SESSION['myWifide_'.$g_token] = true;
+if ( $g_config['mytestor.locking'] ) {
+  $g_unlocked_str = 'false';
+  $_SESSION['myWifide_'.$g_token] = false;
+}
+
 require_once __DIR__ . '/../mobile_detect.php';
     
 if ( check_http_headers_for_mobile() ) {
@@ -143,8 +155,50 @@ body {
 #page-s .dtt-script {
   border: dashed 2px gainsboro;
 }
+
+.dtt-textbox {
+  font-family: monospace;
+  font-size: 12px;
+  color: black;
+  background-color: white;
+  border: solid 1px gainsboro;
+  border-radius: 5px;
+  padding: 2px 5px 2px 5px;
+}
+
+.dtt-button {
+  font-family: monospace;
+  font-size: 12px;
+  color: black;
+  background-color: white;
+  border: solid 2px green;
+  border-left: solid 5px green;
+  border-radius: 0px 5px 5px 0px;
+  padding: 5px 10px 5px 10px;
+}
+
   </style>
   <script>
+let g_token = '<?php print( $g_token ); ?>';
+let g_unlocked = <?php print( $g_unlocked_str ); ?>;
+
+function g_unlock( cb ) {
+  if ( g_unlocked ) return true;
+  let pwd = prompt( 'Please enter password to unlock feature: ');
+  let v_cb = cb;
+  $.post( './../unlock.php', { 'token': g_token, 'pwd': pwd } ).done(function(response) {
+    if ( response == 'y' ) {
+      g_unlocked = true;
+      setTimeout( v_cb, 100 );
+    } else {
+      alert( 'Password does not match! Feature is not unlocked!' );
+    }
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    alert( 'Failed to unlock feature!' );
+  });  
+  return false;
+}
+
 function g_load() {
   $(window).resize( function() {
     g_resize();
@@ -153,7 +207,16 @@ function g_load() {
   g_show_page( 'o' );
 }
 
+function g_show_page_raw( code ) {
+  $('.dtt-cover').hide();
+  $('#page-' + code).show();
+}
+
 function g_show_page( code ) {
+  if ( code !== 'o' ) {
+     let cb = "g_show_page_raw('" + code + "');";
+     if ( ! g_unlock( cb ) ) return;
+  }
   $('.dtt-cover').hide();
   $('#page-' + code).show();
 }
@@ -200,8 +263,15 @@ function g_execute() {
   let code = $('#page-s .dtt-script').val();
   code = g_refine( code );
   $('#page-s .dtt-result').val( "\n" + 'Executing SQL ...' + "\n" );
-  $.post( './../execute.php', { 's': code } ).done(function(response) {
-    $('#page-s .dtt-result').val(response);
+  $.post( './../execute.php', { 'token': g_token, 's': code } ).done(function(response) {
+    if ( response.indexOf( "\n" + '-- loading --' + "\n" ) >= 0 ) {
+      let text = response.replaceAll( "\n" + '-- loading --' + "\n", '' );
+      let old_script = $('#page-s .dtt-script').val();
+      $('#page-s .dtt-script').val(text);
+      $('#page-s .dtt-result').val( 'Script is loaded ...' + "\n\nOld scripts are as following:\n-----------\n" + old_script );
+    } else {
+      $('#page-s .dtt-result').val(response);
+    }
   }).fail(function(jqXHR, textStatus, errorThrown) {
     let message = "\n" + 'Status Code: ' + jqXHR.status + "\n" + 'Status Text: ' + textStatus + "\n" + 'Error Thrown: ' + errorThrown + "\n" + 'Server Response: ' + jqXHR.responseText + "\n";
     $('#page-s .dtt-result').val( message );    
@@ -264,10 +334,12 @@ function g_execute() {
 | pattern   |          | Get code pattern from myTestor.                                                                     |
 | workdir   |          | Set work dir. Argument is selected directory.                                                       |
 | upload    |          | Upload zip file.                                                                                    |
+| download  |          | Zip folder & download zip file. Argument is relative path.                                          |
+| load      |          | Load script file into script editor. Argument is relative path.                                     |
 | list      |          | List buffer directory. Argument is relative path.                                                   |
-| remove    |          | Remove file.                                                                                        |
-| save      |          | Save previous code to file. Does not execute script.                                                |
-| cat       |          | Display script file. Does not execute script.                                                       |
+| remove    |          | Remove file. Argument is relative path.                                                             |
+| save      |          | Save previous code to file. Does not execute script. Argument is relative path.                     |
+| cat       |          | Display script file. Does not execute script. Argument is relative path.                            |
 | open      | (\o)     | Open remote database. Arguments are host, port, username, password, database. Execute below script. |
 +-----------+----------+-----------------------------------------------------------------------------------------------------+
 
@@ -283,9 +355,9 @@ function g_execute() {
   <div id="page-u" class="dtt-cover" style="display: none">
   <div class="dtt-page-counter-cover"><div class="dtt-page-counter-inner"><div style="top: 5px" class="dtt-page-counter" onclick="g_show_page('o');"><div>&nbsp;O</div></div><div style="top: 35px" class="dtt-page-counter" onclick="g_show_page('u');"><div>&nbsp;U</div></div><div style="top: 85px" class="dtt-page-counter" onclick="g_show_page('s');"><div>&nbsp;S</div></div></div></div>
   <div class="dtt-page"><div class="dtt-page-inner"><form enctype="multipart/form-data" target="_blank" method="post" action="./../upload.php">+ Zip File:
-<input type="file" id="dtt-file" name="zip" />
+<input type="file" id="dtt-file" name="zip" class="dtt-textbox" />
   
-<input name="submit" type="submit" value="Upload" onclick="g_show_page('s');" />
+<input name="submit" type="submit" value="Upload" class="dtt-button" onclick="g_show_page('s');" />
 </form> 
   </div></div>
   </div>
