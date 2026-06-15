@@ -46,6 +46,11 @@ myWifide is ready to use on Testor Gifts such as:
 ------------------------------
 
 
+---| 2026.06.16 (3) |---
+
++ Release: myWifide Lite v.0.0.1
+
+
 ---| 2026.06.16 (2) |---
 
 + Add '-- ' prefix to commands which are not in MySQL client
