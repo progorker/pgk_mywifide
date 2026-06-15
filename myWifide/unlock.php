@@ -38,17 +38,23 @@
  * ========================================================
  */
 
+session_start();
 global $g_config;
+require_once __DIR__ . '/config.php';
 
-$g_config = array(
- 'mytestor.host' => 'localhost',
- 'mytestor.port' => '3306',
- 'mytestor.username' => 'mytestor',
- 'mytestor.password' => 'kunqhtsadzmopeh',
- 'mytestor.database' => 'mytestor',
- 'mytestor.command' => '/data/data/com.termux/files/usr/bin/mariadb',
- 'mytestor.zip_cmd' => '/data/data/com.termux/files/usr/bin/zip',
- 'mytestor.unlock_password' => 'homosapien',
- 'mytestor.locking' => true
-);
+function g_param( $key ) {
+  if ( isset( $_POST[ $key ] ) ) return $_POST[ $key ];
+  if ( isset( $_GET[ $key ] ) ) return $_GET[ $key ];
+  return '';
+}
+
+header( 'Content-Type: text/plain' );
+if ( strtolower( $_SERVER['REQUEST_METHOD'] ) === 'post' ) {
+  $pwd = $g_config['mytestor.unlock_password'];
+  if ( g_param('pwd') === $pwd ) {
+    $token = g_param('token');
+    $_SESSION['myWifide_'.$token] = true;
+    echo 'y';
+  }
+}
 ?>

@@ -38,9 +38,10 @@
  * ========================================================
  */
 
+session_start();
 set_time_limit(0);
 
-global $g_config, $g_buffer_dir, $g_open_text, $g_source_text, $g_list_text, $g_remove_text, $g_workdir_text, $g_use_open, $g_open_cfg;
+global $g_config, $g_buffer_dir, $g_open_text, $g_source_text, $g_list_text, $g_remove_text, $g_workdir_text, $g_use_open, $g_open_cfg, $g_download_text, $g_load_text;
 
 require_once __DIR__ . '/config.php';
 
@@ -72,10 +73,12 @@ warnings\t(\W)\tShow warnings after every statement.
 pattern\t \tGet code pattern from myTestor.
 workdir\t \tSet work dir. Argument is selected directory.
 upload \t \tUpload zip file.
+download \t \tZip folder & download zip file. Argument is relative path.
+load   \t \tLoad script file into script editor. Argument is relative path.
 list   \t \tList buffer directory. Argument is relative path.
-remove \t \tRemove file.
-save   \t \tSave previous code to file. Does not execute script.
-cat    \t \tDisplay script file. Does not execute script.
+remove \t \tRemove file. Argument is relative path.
+save   \t \tSave previous code to file. Does not execute script. Argument is relative path.
+cat    \t \tDisplay script file. Does not execute script. Argument is relative path.
 open   \t(\o)\tOpen remote database. Arguments are host, port, username, password, database. Execute below script.
 EOT;
   $rs = '';
@@ -360,6 +363,48 @@ function g_load_cat( $sql ) {
   return $nsql;
 }
 
+function g_load_load( $sql ) {
+  global $g_buffer_dir, $g_load_text;
+  
+  $nsql = '';
+  $start = 0;
+  $finds = [' load ', "\n".'load ' ];
+  $finds_2 = [';', "\n", "\r"];
+  $rets = g_finds( $finds, $sql, $start );
+  while ( count( $rets['idxl'] ) > 0 ) {
+    $pidx = $rets['pidx'];
+    $key = $rets['kyl'][$pidx];
+    $idx = $rets['idxl'][$pidx];
+    $sz = $rets['szl'][$pidx];
+    $nsql .= substr( $sql, $start, $idx - $start );
+    $rets_2 = g_finds( $finds_2, $sql, $idx + $sz );
+    $pidx_2 = $rets_2['pidx'];
+    if ( count( $rets_2['idxl'] ) > 0 ) {
+      $filename = substr( $sql, $idx + $sz, $rets_2['idxl'][$pidx_2] - $idx - $sz);
+      $start = $rets_2['idxl'][$pidx_2] + $rets_2['szl'][$pidx_2];
+    } else {
+      $filename = substr( $sql, $idx + $sz );
+      $start = strlen( $sql );
+    }
+    $filename = trim( $filename );
+    $filename = str_replace( '..', '', $filename );
+    $filename = str_replace( '..', '', $filename );
+    $filename = trim( $filename );
+    $cat = trim( @file_get_contents( $g_buffer_dir . '/' . $filename ) );
+    if ( $cat !== '' ) {
+      $g_load_text = "\n-- loading --\n" . $cat;
+      return '';
+    }
+    $rets = g_finds( $finds, $sql, $start );
+  }
+  $nsql .= substr( $sql, $start );
+  $rets = g_finds( $finds, $nsql, 0 );
+  if ( count( $rets['idxl'] ) > 0 ) {
+    $nsql = g_load_load( $nsql );
+  }
+  return $nsql;
+}
+
 function g_load_list( $sql ) {
   global $g_buffer_dir, $g_list_text;
   
@@ -389,7 +434,12 @@ function g_load_list( $sql ) {
     $filename = str_replace( '..', '', $filename );
     $filename = trim( $filename );
     $cmd = "ls -1 " . $g_buffer_dir . '/' . $filename;
+    $dir = dirname( $g_buffer_dir . '/' . $filename );
+    @mkdir( $dir, 0777, true );
     $cat = trim( @shell_exec( $cmd ) . '' );
+    if ( $cat === '' ) {
+      $cat = '__BLANK__';
+    }
     if ( $cat !== '' ) {
       $has_list = true;
       $cat = "[DIR] $filename" . "\n" . $cat;
@@ -458,6 +508,78 @@ function g_load_remove( $sql ) {
   $rets = g_finds( $finds, $nsql, 0 );
   if ( count( $rets['idxl'] ) > 0 ) {
     $nsql = g_load_remove( $nsql );
+  }
+  return $nsql;
+}
+
+function g_load_download( $sql ) {
+  global $g_config, $g_buffer_dir, $g_download_text;
+  
+  $zip_cmd = $g_config['mytestor.zip_cmd'];
+  
+  $nsql = '';
+  $start = 0;
+  $finds = [' download ', "\n".'download ' ];
+  $finds_2 = [';', "\n", "\r"];
+  $rets = g_finds( $finds, $sql, $start );
+  while ( count( $rets['idxl'] ) > 0 ) {
+    $pidx = $rets['pidx'];
+    $key = $rets['kyl'][$pidx];
+    $idx = $rets['idxl'][$pidx];
+    $sz = $rets['szl'][$pidx];
+    $nsql .= substr( $sql, $start, $idx - $start );
+    $rets_2 = g_finds( $finds_2, $sql, $idx + $sz );
+    $pidx_2 = $rets_2['pidx'];
+    if ( count( $rets_2['idxl'] ) > 0 ) {
+      $filename = substr( $sql, $idx + $sz, $rets_2['idxl'][$pidx_2] - $idx - $sz);
+      $start = $rets_2['idxl'][$pidx_2] + $rets_2['szl'][$pidx_2];
+    } else {
+      $filename = substr( $sql, $idx + $sz );
+      $start = strlen( $sql );
+    }
+    $filename = trim( $filename );
+    $filename = str_replace( '..', '', $filename );
+    $filename = str_replace( '..', '', $filename );
+    $filename = trim( $filename );
+    $src_dir = $g_buffer_dir . '/' . $filename;
+    if ( is_dir( $src_dir ) ) {
+      $tmp_dir = __DIR__ . '/tmp/' . uniqid();
+      @mkdir( $tmp_dir, 0777, true );
+      $code = substr( strrev( uniqid() ), 0, 4 );
+      $zip_dir = $tmp_dir . '/' . $code;
+      @mkdir( $zip_dir, 0777, true );
+      $cmd = "cp -rf $src_dir/* $zip_dir/";
+      @shell_exec( $cmd );
+      $zip_file = $code . '.zip';
+      $cmd = "cd $tmp_dir && $zip_cmd -r $zip_file $code";      
+      @shell_exec( $cmd );
+      $zip_file = $tmp_dir . '/' . $zip_file;
+      $dl_dir = __DIR__ . '/downloads';
+      @mkdir( $dl_dir, 0777, true );
+      $cmd = "cp -f $zip_file $dl_dir/";
+      @shell_exec( $cmd );
+      $zip_file = $code . '.zip';
+      $uri = $_SERVER['REQUEST_URI'];
+      $idx = strrpos( $uri, '/' );
+      if ( $idx !== false ) {
+        $uri = substr( $uri, 0, $idx );
+      }
+      $protocol = ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] === 'on' ) ? 'https' : 'http';
+      $dl_url = $protocol . '://' . $_SERVER['HTTP_HOST'] . $uri . '/downloads/' . $zip_file;
+      $cat = "[ Download ] " . $filename . "\n" . $dl_url;
+      $rs = '';
+      g_parse_results( $cat, $rs );
+      $g_download_text .= "\n" . $rs . "\n";
+      $cmd = "rm -rf $tmp_dir";
+      @shell_exec( $cmd );
+    }
+    $nsql .= "\n-- loaddownload --\n";
+    $rets = g_finds( $finds, $sql, $start );
+  }
+  $nsql .= substr( $sql, $start );
+  $rets = g_finds( $finds, $nsql, 0 );
+  if ( count( $rets['idxl'] ) > 0 ) {
+    $nsql = g_load_download( $nsql );
   }
   return $nsql;
 }
@@ -680,6 +802,8 @@ function g_refine( $sql ) {
   $sql = g_load_save( "\n" . $sql . "\n" );
   $sql = g_load_list( "\n" . $sql . "\n" );
   $sql = g_load_remove( "\n" . $sql . "\n" );
+  $sql = g_load_download( "\n" . $sql . "\n" );
+  $sql = g_load_load( "\n" . $sql . "\n" );
   $sql = g_load_help( "\n" . $sql . "\n" );
   
   $sql = str_replace( ' source ', ' -- _source_ ', $sql );
@@ -815,10 +939,18 @@ function g_parse_results( $text, &$p_results ) {
 
 header('Content-Type: text/plain');
 
+$token = g_param('token');
+if ( !isset( $_SESSION['myWifide_'.$token] ) || $_SESSION['myWifide_'.$token] === false ) {
+  exit();
+}
+
+
 $g_buffer_dir = __DIR__ . '/buffers';
 @mkdir( $g_buffer_dir, 0777, true );
 
 $g_use_open = false;
+$g_load_text = '';
+$g_download_text = '';
 $g_source_text = '';
 $g_list_text = '';
 $g_remove_text = '';
@@ -826,6 +958,10 @@ $g_workdir_text = '';
 
 $sql = g_param('s');
 $sql = g_refine( $sql );
+if ( strpos( $g_load_text, "\n-- loading --\n" ) !== false ) {
+  echo $g_load_text;
+  exit;
+}
 $result = '';
 if ( strpos( $sql, "\n-- loadsrc --\n" ) !== false ) {
   $cat = "[SRC]" . "\n" . $g_source_text;
@@ -864,6 +1000,9 @@ if ( strpos( $sql, "\n-- loadlist --\n" ) !== false ) {
 }
 if ( strpos( $sql, "\n-- loadremove --\n" ) !== false ) {
   $result = $result . "\n" . trim( $g_remove_text ) . "\n";
+}
+if ( strpos( $sql, "\n-- loaddownload --\n" ) !== false ) {
+  $result = $result . "\n" . trim( $g_download_text ) . "\n";
 }
 if ( strpos( $sql, "\n-- loadworkdir --\n" ) !== false ) {
   $result = $result . "\n" . trim( $g_workdir_text ) . "\n";
