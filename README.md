@@ -42,6 +42,17 @@ myWifide is ready to use on Testor Gifts such as:
 
 
 ---------_--__--_------_------
+       Latest Changes
+------------------------------
+
+---| 2026.06.16 (1) |---
+
++ Add 'download' command
++ Add 'load' command
++ Add 'locking' feature
+
+
+---------_--__--_------_------
          Screenshots
 ------------------------------
 ```
@@ -65,17 +76,6 @@ myWifide is ready to use on Testor Gifts such as:
 ![](https://github.com/progorker/pgk_mywifide/blob/main/myWifide/shots/shot_009.png?raw=true)
 
 ```
----------_--__--_------_------
-          Changes
-------------------------------
-
----| 2026.06.16 |---
-
-+ Add 'download' command
-+ Add 'load' command
-+ Add 'locking' feature
-
-
 ---------_--__--_------_------
      Supported Commands
 ------------------------------
