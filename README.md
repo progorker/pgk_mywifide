@@ -15,6 +15,9 @@
 myWifide is simple IDE for MySQL. It is designed
 to work on Wi-Fi network or single user hosting.
 
+This is lite version which is designed to keep it
+small, simple & efficient.
+
 myWifide is ready to use on Testor Gifts such as:
 + Testor Cloud Personal Gift: https://progorker.github.io/sponsor/testor.cloud.personal.html
 + Testor Cloud Startup Gift: https://progorker.github.io/sponsor/testor.cloud.startup.html
