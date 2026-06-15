@@ -70,16 +70,16 @@ source \t(\.)\tExecute an SQL script file. Takes a file name as an argument.
 status \t(\s)\tGet status information from the server.
 use    \t(\u)\tUse another database. Takes database name as argument.
 warnings\t(\W)\tShow warnings after every statement.
-pattern\t \tGet code pattern from myTestor.
-workdir\t \tSet work dir. Argument is selected directory.
-upload \t \tUpload zip file.
-download \t \tZip folder & download zip file. Argument is relative path.
-load   \t \tLoad script file into script editor. Argument is relative path.
-list   \t \tList buffer directory. Argument is relative path.
-remove \t \tRemove file. Argument is relative path.
-save   \t \tSave previous code to file. Does not execute script. Argument is relative path.
-cat    \t \tDisplay script file. Does not execute script. Argument is relative path.
-open   \t(\o)\tOpen remote database. Arguments are host, port, username, password, database. Execute below script.
+-- pattern\t \tGet code pattern from myTestor.
+-- workdir\t \tSet work dir. Argument is selected directory.
+-- upload \t \tUpload zip file.
+-- download \t \tZip folder & download zip file. Argument is relative path.
+-- load   \t \tLoad script file into script editor. Argument is relative path.
+-- list   \t \tList buffer directory. Argument is relative path.
+-- remove \t \tRemove file. Argument is relative path.
+-- save   \t \tSave previous code to file. Does not execute script. Argument is relative path.
+-- cat    \t \tDisplay script file. Does not execute script. Argument is relative path.
+-- open   \t(-- \o)\tOpen remote database. Arguments are host, port, username, password, database. Execute below script.
 EOT;
   $rs = '';
   g_parse_results( $text, $rs );
@@ -323,7 +323,7 @@ function g_load_cat( $sql ) {
   $has_cat = false;
   $nsql = '';
   $start = 0;
-  $finds = [' cat ', "\n".'cat ' ];
+  $finds = [' -- cat ', "\n".'-- cat ' ];
   $finds_2 = [';', "\n", "\r"];
   $rets = g_finds( $finds, $sql, $start );
   while ( count( $rets['idxl'] ) > 0 ) {
@@ -368,7 +368,7 @@ function g_load_load( $sql ) {
   
   $nsql = '';
   $start = 0;
-  $finds = [' load ', "\n".'load ' ];
+  $finds = [' -- load ', "\n".'-- load ' ];
   $finds_2 = [';', "\n", "\r"];
   $rets = g_finds( $finds, $sql, $start );
   while ( count( $rets['idxl'] ) > 0 ) {
@@ -411,7 +411,7 @@ function g_load_list( $sql ) {
   $has_list = false;
   $nsql = '';
   $start = 0;
-  $finds = [' list ', "\n".'list ' ];
+  $finds = [' -- list ', "\n".'-- list ' ];
   $finds_2 = [';', "\n", "\r"];
   $rets = g_finds( $finds, $sql, $start );
   while ( count( $rets['idxl'] ) > 0 ) {
@@ -465,7 +465,7 @@ function g_load_remove( $sql ) {
   
   $nsql = '';
   $start = 0;
-  $finds = [' remove ', "\n".'remove ' ];
+  $finds = [' -- remove ', "\n".'-- remove ' ];
   $finds_2 = [';', "\n", "\r"];
   $rets = g_finds( $finds, $sql, $start );
   while ( count( $rets['idxl'] ) > 0 ) {
@@ -519,7 +519,7 @@ function g_load_download( $sql ) {
   
   $nsql = '';
   $start = 0;
-  $finds = [' download ', "\n".'download ' ];
+  $finds = [' -- download ', "\n".'-- download ' ];
   $finds_2 = [';', "\n", "\r"];
   $rets = g_finds( $finds, $sql, $start );
   while ( count( $rets['idxl'] ) > 0 ) {
@@ -589,7 +589,7 @@ function g_load_workdir( $sql ) {
   
   $nsql = '';
   $start = 0;
-  $finds = [' workdir ', "\n".'workdir ' ];
+  $finds = [' -- workdir ', "\n".'-- workdir ' ];
   $finds_2 = [';', "\n", "\r"];
   $rets = g_finds( $finds, $sql, $start );
   while ( count( $rets['idxl'] ) > 0 ) {
@@ -636,7 +636,7 @@ function g_load_save( $sql ) {
   $has_save = false;
   $nsql = '';
   $start = 0;
-  $finds = [' save ', "\n".'save ' ];
+  $finds = [' -- save ', "\n".'-- save ' ];
   $finds_2 = [';', "\n", "\r"];
   $rets = g_finds( $finds, $sql, $start );
   while ( count( $rets['idxl'] ) > 0 ) {
@@ -683,7 +683,7 @@ function g_load_pattern( $sql ) {
   
   $nsql = '';
   $start = 0;
-  $finds = [ ' pattern ', "\n".'pattern ' ];
+  $finds = [ ' -- pattern ', "\n".'-- pattern ' ];
   $finds_2 = [';', "\n", "\r"];
   $rets = g_finds( $finds, $sql, $start );
   while ( count( $rets['idxl'] ) > 0 ) {
@@ -738,7 +738,7 @@ function g_load_open( $sql ) {
   $has_open = false;
   $nsql = '';
   $start = 0;
-  $finds = [ ' open ', "\n".'open ', ' \\o ', "\n".'\\o ' ];
+  $finds = [ ' -- open ', "\n".'-- open ', ' -- \\o ', "\n".'-- \\o ' ];
   $finds_2 = [';', "\n", "\r"];
   $rets = g_finds( $finds, $sql, $start );
   while ( count( $rets['idxl'] ) > 0 ) {
