@@ -17,13 +17,8 @@ to work on Wi-Fi network or single user hosting.
 
 myWifide is ready to use on Testor Gifts such as:
 + Testor Cloud Personal Gift: https://progorker.github.io/sponsor/testor.cloud.personal.html
-  o It is customized myWifide for password protected single user usage
-
 + Testor Cloud Startup Gift: https://progorker.github.io/sponsor/testor.cloud.startup.html
-  o It is customized myWifide for password protected multi users usage
-
 + Testor Progod Personal Gift: https://progorker.github.io/sponsor/testor.progod.personal.html
-  o It is customized myWifide for single user usage
 
 
 ---------_--__--_------_------
@@ -44,3 +39,21 @@ myWifide is ready to use on Testor Gifts such as:
 ![](https://github.com/progorker/pgk_mywifide/blob/main/myWifide/shots/shot_006.png?raw=true)
 
 ![](https://github.com/progorker/pgk_mywifide/blob/main/myWifide/shots/shot_007.png?raw=true)
+
+![](https://github.com/progorker/pgk_mywifide/blob/main/myWifide/shots/shot_008.png?raw=true)
+
+![](https://github.com/progorker/pgk_mywifide/blob/main/myWifide/shots/shot_009.png?raw=true)
+
+```
+---------_--__--_------_------
+          Changes
+------------------------------
+
+---| 2026.06.16 |---
+
++ Add 'download' command
++ Add 'load' command
++ Add 'locking' feature
+
+
+```
