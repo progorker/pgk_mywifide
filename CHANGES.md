@@ -10,6 +10,16 @@
 ==============================
 
 
+---| 2026.06.16 (3) |---
+
++ Release: myWifide Lite v.0.0.1
+
+
+---| 2026.06.16 (2) |---
+
++ Add '-- ' prefix to commands which are not in MySQL client
+
+
 ---| 2026.06.16 (1) |---
 
 + Add 'download' command
