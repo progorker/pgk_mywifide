@@ -60,6 +60,10 @@ if ( ! check_http_headers_for_mobile() ) {
 <head>
   <title>[ myWifide ] IDE @ Wi-Fi for MySQL</title>
   <script src="./../jquery-4.0.0.min.js"></script>
+  <link rel="stylesheet" href="./../libs/codemirror/lib/codemirror.css">
+  <link rel="stylesheet" href="./../libs/codemirror/theme/idea.css">
+  <script src="./../libs/codemirror/lib/codemirror.js"></script>
+  <script src="./../libs/codemirror/mode/sql/sql.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
   <style>
 body {
@@ -181,6 +185,7 @@ body {
   <script>
 let g_token = '<?php print( $g_token ); ?>';
 let g_unlocked = <?php print( $g_unlocked_str ); ?>;
+let g_editor = false;
 
 function g_unlock( cb ) {
   if ( g_unlocked ) return true;
@@ -205,6 +210,16 @@ function g_load() {
   } );
   g_resize();
   g_show_page( 'o' );
+  
+  var editor = CodeMirror.fromTextArea(document.getElementById("dtt-script"), {
+    lineNumbers: true,
+    styleActiveLine: true,
+    matchBrackets: true
+  });
+  editor.setOption("theme", 'idea');
+  editor.setOption("mode", 'sql');
+  g_editor = editor;
+  g_resize();
 }
 
 function g_show_page_raw( code ) {
@@ -238,6 +253,15 @@ function g_resize() {
   $('#page-o .dtt-page-inner').css( 'minHeight', '2200px');
   $('.dtt-page-inner').css( 'border', 'dotted 2px gainsboro' );
   $('.dtt-page-inner').css( 'padding', '5px' );
+  
+  $('#page-s .dtt-script-cover').width( sw - 40 - 35 - 15 + 10 );
+  $('#page-s .dtt-script-cover').height( parseInt( ( sh - 15 - 15 - 15 ) / 2 ) - 10 );
+  $('#page-s .dtt-script-cover').css( 'border', 'dotted 2px gainsboro' );
+  $('#page-s .dtt-script-cover').css( 'borderRadius', '10px' );
+  $('#page-s .dtt-script-cover').css( 'overflow', 'hidden' );
+  $('#page-s .dtt-script-cover .CodeMirror').width( sw - 40 - 35 - 15 + 10 );
+  $('#page-s .dtt-script-cover .CodeMirror').height( parseInt( ( sh - 15 - 15 - 15 ) / 2 ) - 10 );
+
   $('#page-s .dtt-script').width( sw - 40 - 35 - 15 + 10 );
   $('#page-s .dtt-script').height( parseInt( ( sh - 15 - 15 - 15 ) / 2 ) - 10 );
   $('#page-s .dtt-result').width( sw - 40 - 35 - 15 + 10 );
@@ -260,14 +284,14 @@ function g_refine( sql ) {
 
 function g_execute() {
   $('#page-s .dtt-result').val('');
-  let code = $('#page-s .dtt-script').val();
+  let code = g_editor.doc.getValue();
   code = g_refine( code );
   $('#page-s .dtt-result').val( "\n" + 'Executing SQL ...' + "\n" );
   $.post( './../execute.php', { 'token': g_token, 's': code } ).done(function(response) {
     if ( response.indexOf( "\n" + '-- loading --' + "\n" ) >= 0 ) {
       let text = response.replaceAll( "\n" + '-- loading --' + "\n", '' );
-      let old_script = $('#page-s .dtt-script').val();
-      $('#page-s .dtt-script').val(text);
+      let old_script = g_editor.doc.getValue();
+      g_editor.doc.setValue(text);
       $('#page-s .dtt-result').val( 'Script is loaded ...' + "\n\nOld scripts are as following:\n-----------\n" + old_script );
     } else {
       $('#page-s .dtt-result').val(response);
@@ -350,7 +374,7 @@ function g_execute() {
   <div class="dtt-page-counter-cover"><div class="dtt-page-counter-inner"><div style="top: 5px" class="dtt-page-counter" onclick="g_show_page('o');"><div>&nbsp;O</div></div></div></div>
 
   <div class="dtt-page-counter-cover"><div class="dtt-page-counter-inner"><div style="top: 5px" class="dtt-page-counter" onclick="g_show_page('o');"><div>&nbsp;O</div></div><div style="top: 35px" class="dtt-page-counter" onclick="g_show_page('s');"><div>&nbsp;S</div></div><div style="top: 85px" class="dtt-page-counter" onclick="g_execute();"><div>&nbsp;E</div></div></div></div>
-  <div class="dtt-page"><div class="dtt-page-inner"><textarea class="dtt-script"></textarea><textarea class="dtt-result"></textarea></div></div></div>
+  <div class="dtt-page"><div class="dtt-page-inner"><div class="dtt-script-cover"><textarea id="dtt-script" class="dtt-script"></textarea><textarea class="dtt-result"></textarea></div></div></div></div>
 
   <div id="page-u" class="dtt-cover" style="display: none">
   <div class="dtt-page-counter-cover"><div class="dtt-page-counter-inner"><div style="top: 5px" class="dtt-page-counter" onclick="g_show_page('o');"><div>&nbsp;O</div></div><div style="top: 35px" class="dtt-page-counter" onclick="g_show_page('u');"><div>&nbsp;U</div></div><div style="top: 85px" class="dtt-page-counter" onclick="g_show_page('s');"><div>&nbsp;S</div></div></div></div>
