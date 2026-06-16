@@ -80,6 +80,9 @@ warnings\t(\W)\tShow warnings after every statement.
 -- save   \t \tSave previous code to file. Does not execute script. Argument is relative path.
 -- cat    \t \tDisplay script file. Does not execute script. Argument is relative path.
 -- open   \t(-- \o)\tOpen remote database. Arguments are host, port, username, password, database. Execute below script.
+-- username\t\tSet Testor's username. It is executed in client side.
+-- password\t\tSet Testor's password. It is executed in client side.
+-- proxy\t\tSet TestorProxy' connection command. It is executed in client side.
 EOT;
   $rs = '';
   g_parse_results( $text, $rs );

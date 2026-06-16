@@ -49,6 +49,10 @@ $g_config = array(
  'mytestor.command' => '/data/data/com.termux/files/usr/bin/mariadb',
  'mytestor.zip_cmd' => '/data/data/com.termux/files/usr/bin/zip',
  'mytestor.unlock_password' => 'homosapien',
- 'mytestor.locking' => true
+ 'mytestor.locking' => true,
+ 
+ 'testor.username' => 'mytestor',
+ 'testor.password' => 'rzutomqahegpnyx'
+ 
 );
 ?>
