@@ -38,6 +38,9 @@ myWifide is ready to use on Testor Gifts such as:
 | -- save      |          | Save previous code to file. Does not execute script. Argument is relative path.                     |
 | -- cat       |          | Display script file. Does not execute script. Argument is relative path.                            |
 | -- open      | (-- \o)  | Open remote database. Arguments are host, port, username, password, database. Execute below script. |
+| -- username  |          | Set Testor's username. It is executed in client side.                                               |
+| -- password  |          | Set Testor's password. It is executed in client side.                                               |
+| -- proxy     |          | Set TestorProxy' connection command. It is executed in client side.                                 |
 +--------------+----------+-----------------------------------------------------------------------------------------------------+
 
 
@@ -46,6 +49,13 @@ myWifide is ready to use on Testor Gifts such as:
 ------------------------------
 
 
+---| 2026.06.16 (5) |---
+
++ Add 'multiple script tabs' feature
++ Add 'Run Unit Test' feature
++ Release: myWifide v.0.0.1
+
+ 
 ---| 2026.06.16 (4) |---
 
 + Replace 'script' textarea by code editor from 'CodeMirror' with syntax highlight, line numbers. Syntax highlight is available for supported commands which is not in MySQL client and 'help', 'source'.
@@ -95,6 +105,8 @@ myWifide is ready to use on Testor Gifts such as:
 
 ![](https://github.com/progorker/pgk_mywifide/blob/main/myWifide/shots/shot_011.png?raw=true)
 
+![](https://github.com/progorker/pgk_mywifide/blob/main/myWifide/shots/shot_012.png?raw=true)
+
 ```
 ---------_--__--_------_------
      Supported Commands
@@ -133,6 +145,9 @@ myWifide is ready to use on Testor Gifts such as:
 | -- save      |          | Save previous code to file. Does not execute script. Argument is relative path.                     |
 | -- cat       |          | Display script file. Does not execute script. Argument is relative path.                            |
 | -- open      | (-- \o)  | Open remote database. Arguments are host, port, username, password, database. Execute below script. |
+| -- username  |          | Set Testor's username. It is executed in client side.                                               |
+| -- password  |          | Set Testor's password. It is executed in client side.                                               |
+| -- proxy     |          | Set TestorProxy' connection command. It is executed in client side.                                 |
 +--------------+----------+-----------------------------------------------------------------------------------------------------+
 
 ```
