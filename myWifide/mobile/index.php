@@ -39,7 +39,7 @@
  */
 
 session_start();
-global $g_config, $g_unlocked_str, $g_token;
+global $g_config, $g_unlocked_str, $g_token, $g_testor_username, $g_testor_password;
 require_once __DIR__ . '/../config.php';
 $g_token = uniqid();
 
@@ -49,6 +49,9 @@ if ( $g_config['mytestor.locking'] ) {
   $g_unlocked_str = 'false';
   $_SESSION['myWifide_'.$g_token] = false;
 }
+
+$g_testor_username = $g_config['testor.username'];
+$g_testor_password = $g_config['testor.password'];
 
 require_once __DIR__ . '/../mobile_detect.php';
     
@@ -186,6 +189,99 @@ body {
 let g_token = '<?php print( $g_token ); ?>';
 let g_unlocked = <?php print( $g_unlocked_str ); ?>;
 let g_editor = false;
+let g_data = [];
+let g_cur_tab = '0';
+let g_cur_file = '';
+let g_testor_username = '<?php print( $g_testor_username ); ?>';
+let g_testor_password = '<?php print( $g_testor_password ); ?>';
+let g_testor_suite = '_';
+let g_testor_proxy = '_';
+
+function g_utp_mytestor() {
+  return `set @g_testor_username = '__USERNAME__';
+set @g_testor_password = '__PASSWORD__';
+set @g_suite_code = '__SUITE_CODE__';
+set @g_token = '_';
+set @g_suite_id = -1;
+
+call api_testor_login( @g_token, @g_testor_username, @g_testor_password );
+
+call api_testor_suite( @g_token, @g_suite_id, @g_suite_code );
+call api_testor_clean( @g_token, @g_suite_id );
+
+__TEST_SOURCE__
+
+call api_testor_finish( @g_token, @g_suite_id );
+call api_testor_source_list( @g_token, @g_suite_id, 1 );
+call api_testor_failed( @g_token, @g_suite_id, 1 );
+call api_testor_success( @g_token, @g_suite_id, 1 );
+call api_testor_result( @g_token, @g_suite_id );
+call api_testor_logout( @g_token );
+`;
+}
+
+function g_utp_mytestorproxy() {
+  return `__OPEN_CMD__
+set @g_testor_username = '__USERNAME__';
+set @g_testor_password = '__PASSWORD__';
+set @g_suite_code = '__SUITE_CODE__';
+set @g_token = '_';
+set @g_suite_id = -1;
+
+call mytestorproxy.api_testor_login( @g_token, @g_testor_username, @g_testor_password );
+
+call mytestorproxy.api_testor_suite( @g_token, @g_suite_id, @g_suite_code );
+call mytestorproxy.api_testor_clean( @g_token, @g_suite_id );
+
+__TEST_SOURCE__
+
+call mytestorproxy.api_testor_finish( @g_token, @g_suite_id );
+call mytestorproxy.api_testor_source_list( @g_token, @g_suite_id, 1 );
+call mytestorproxy.api_testor_failed( @g_token, @g_suite_id, 1 );
+call mytestorproxy.api_testor_success( @g_token, @g_suite_id, 1 );
+call mytestorproxy.api_testor_result( @g_token, @g_suite_id );
+call mytestorproxy.api_testor_logout( @g_token );
+`;
+}
+
+function g_refine_result( text ) {
+  let idx = text.indexOf( "\n" );
+  if ( idx >= 0 ) {
+    let ln = text.substring(0, idx);
+    text = text.substring( idx + 1);
+  }
+  text = "=====> Tab: '" + g_cur_tab + "', File: " + g_cur_file + " <======" + "\n" + text;
+  return text;
+}
+
+function g_initialize_data() {
+  for ( var i = 0; i < 10; i++ ) {
+    g_data[''+i] = { 's': "/* Welcome to myWifide v.0.0.1 !\n\nPlease try following command to start: \n\n$) help\n\n$) set @v_man = ''; call api_testor_man( 'mytestor', 'procedure', 'api_testor_man', @v_man ); select @v_man as manual\\G \n\n$) set @v_man = ''; call api_testor_man( 'mytestor', 'procedure', 'api_testor_pattern', @v_man ); select @v_man as manual\\G \n\n*/", 'r': '', 'f': './tab-' + i + '.sql' };
+  }
+}
+
+function g_save_tab( code ) {
+  g_data[code]['s'] = g_editor.doc.getValue();
+  g_data[code]['r'] = $('#page-s .dtt-result').val();
+  g_data[code]['f'] = g_cur_file;
+}
+
+function g_show_tab( code ) {
+  g_save_tab( g_cur_tab );
+  let script = g_data[code]['s'];
+  let result = g_data[code]['r'];
+  let cur_file = g_data[code]['f'];
+  g_editor.doc.setValue(script);
+  g_cur_file = cur_file;
+  g_cur_tab = code;
+  $('#page-s .dtt-result').val(g_refine_result(result));
+  
+  $('#page-s .dtt-tab-button div').css( 'backgroundColor', 'white' );
+  $('#page-s .dtt-tab-button div').css( 'color', 'black' );
+  
+  $('#page-s #dtt-tab-' + code + ' div').css( 'backgroundColor', 'lightpink' );
+  $('#page-s #dtt-tab-' + code + ' div').css( 'color', 'white' );
+}
 
 function g_unlock( cb ) {
   if ( g_unlocked ) return true;
@@ -205,6 +301,7 @@ function g_unlock( cb ) {
 }
 
 function g_load() {
+  g_initialize_data();
   $(window).resize( function() {
     g_resize();
   } );
@@ -220,6 +317,13 @@ function g_load() {
   editor.setOption("mode", 'sql');
   g_editor = editor;
   g_resize();
+  
+  let script = g_data['0']['s'];
+  let result = g_data['0']['r'];
+  g_cur_file = g_data['0']['f'];
+  g_editor.doc.setValue(script);
+  $('#page-s .dtt-result').val(g_refine_result(result));
+  g_show_tab('0');
 }
 
 function g_show_page_raw( code ) {
@@ -278,27 +382,167 @@ function g_refine( sql ) {
     $('#dtt-file').val('');
     g_show_page('u');
     sql = sql.replaceAll( '-- upload', '-- _upload_ --' );
+  } else {
+  
+    let idx = ("\n" + sql + "\n").indexOf( "\n-- username " );
+    if ( idx >= 0 ) {
+      let tmp = ("\n" + sql + "\n").substring( idx + 13 );
+      idx = tmp.indexOf( ";" );
+      if ( idx >= 0 ) {
+        tmp = tmp.substring( 0, idx );
+      }
+      idx = tmp.indexOf( "\n" );
+      if ( idx >= 0 ) {
+        tmp = tmp.substring( 0, idx );
+      }
+      tmp = tmp.trim();
+      g_testor_username = tmp;
+    }
+      
+    idx = ("\n" + sql + "\n").indexOf( "\n-- password " );
+    if ( idx >= 0 ) {
+      let tmp = ("\n" + sql + "\n").substring( idx + 13 );
+      idx = tmp.indexOf( ";" );
+      if ( idx >= 0 ) {
+        tmp = tmp.substring( 0, idx );
+      }
+      idx = tmp.indexOf( "\n" );
+      if ( idx >= 0 ) {
+        tmp = tmp.substring( 0, idx );
+      }
+      tmp = tmp.trim();
+      g_testor_password = tmp;
+    }
+
+    idx = ("\n" + sql + "\n").indexOf( "\n-- suite " );
+    if ( idx >= 0 ) {
+      let tmp = ("\n" + sql + "\n").substring( idx + 13 );
+      idx = tmp.indexOf( ";" );
+      if ( idx >= 0 ) {
+        tmp = tmp.substring( 0, idx );
+      }
+      idx = tmp.indexOf( "\n" );
+      if ( idx >= 0 ) {
+        tmp = tmp.substring( 0, idx );
+      }
+      tmp = tmp.trim();
+      g_testor_suite = tmp;
+    }
+
+    idx = ("\n" + sql + "\n").indexOf( "\n-- proxy " );
+    if ( idx >= 0 ) {
+      let tmp = ("\n" + sql + "\n").substring( idx + 13 );
+      idx = tmp.indexOf( ";" );
+      if ( idx >= 0 ) {
+        tmp = tmp.substring( 0, idx );
+      }
+      idx = tmp.indexOf( "\n" );
+      if ( idx >= 0 ) {
+        tmp = tmp.substring( 0, idx );
+      }
+      tmp = tmp.trim();
+      g_testor_proxy = tmp;
+    }
+
   }
   return sql;
 }
 
+function g_unit_test() {
+  let open_cmd = prompt( "Please enter '-- open' command if you use proxy: " );
+  open_cmd = open_cmd.trim();
+  let username = prompt( "Please enter Testor's username: " );
+  let password = prompt( "Please enter Testor's password: " );
+  let suite_code = prompt( "Please enter test suite code: " );
+  let code = g_utp_mytestor();
+  if ( open_cmd != '' ) {
+    code = g_utp_mytestorproxy();
+    code = code.replaceAll( '__OPEN_CMD__', open_cmd );
+  }
+  code = code.replaceAll( '__USERNAME__', username );
+  code = code.replaceAll( '__PASSWORD__', password );
+  code = code.replaceAll( '__SUITE_CODE__', suite_code );
+  code = code.replaceAll( '__TEST_SOURCE__', g_editor.doc.getValue() );
+  code = g_refine( code );
+  $('#page-s .dtt-result').val(g_refine_result(''));
+  $('#page-s .dtt-result').val( g_refine_result("\n" + 'Executing SQL ...' + "\n") );
+  $.post( './../execute.php', { 'token': g_token, 's': code } ).done(function(response) {
+    $('#page-s .dtt-result').val(g_refine_result(response));
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    let message = "\n" + 'Status Code: ' + jqXHR.status + "\n" + 'Status Text: ' + textStatus + "\n" + 'Error Thrown: ' + errorThrown + "\n" + 'Server Response: ' + jqXHR.responseText + "\n";
+    $('#page-s .dtt-result').val( g_refine_result(message) );    
+  });  
+}
+
+function g_def_unit_test() {
+  let open_cmd = g_testor_proxy;
+  if ( g_testor_proxy == '_' || g_testor_proxy == '' ) {
+    open_cmd = prompt( "Please enter '-- open' command if you use proxy: " );
+  }
+  open_cmd = open_cmd.trim();
+  if ( open_cmd != '_' && open_cmd != '' ) {
+    g_testor_proxy = open_cmd;
+  }
+  let username = g_testor_username;
+  let password = g_testor_password;
+  let suite_code = g_testor_suite;
+  if ( g_testor_suite == '_' || g_testor_suite == '' ) {
+    suite_code = prompt( "Please enter test suite code: " );
+    suite_code = suite_code.trim();
+    if ( suite_code == '_' || suite_code == '' ) return;
+  }
+  let code = g_utp_mytestor();
+  if ( open_cmd != '' && open_cmd != '_' ) {
+    code = g_utp_mytestorproxy();
+    code = code.replaceAll( '__OPEN_CMD__', open_cmd );
+  }
+  code = code.replaceAll( '__USERNAME__', username );
+  code = code.replaceAll( '__PASSWORD__', password );
+  code = code.replaceAll( '__SUITE_CODE__', suite_code );
+  code = code.replaceAll( '__TEST_SOURCE__', g_editor.doc.getValue() );
+  code = g_refine( code );
+  $('#page-s .dtt-result').val(g_refine_result(''));
+  $('#page-s .dtt-result').val( g_refine_result("\n" + 'Executing SQL ...' + "\n") );
+  $.post( './../execute.php', { 'token': g_token, 's': code } ).done(function(response) {
+    $('#page-s .dtt-result').val(g_refine_result(response));
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    let message = "\n" + 'Status Code: ' + jqXHR.status + "\n" + 'Status Text: ' + textStatus + "\n" + 'Error Thrown: ' + errorThrown + "\n" + 'Server Response: ' + jqXHR.responseText + "\n";
+    $('#page-s .dtt-result').val( g_refine_result(message) );    
+  });  
+}
+
 function g_execute() {
-  $('#page-s .dtt-result').val('');
+  $('#page-s .dtt-result').val(g_refine_result(''));
   let code = g_editor.doc.getValue();
   code = g_refine( code );
-  $('#page-s .dtt-result').val( "\n" + 'Executing SQL ...' + "\n" );
+  $('#page-s .dtt-result').val( g_refine_result("\n" + 'Executing SQL ...' + "\n") );
   $.post( './../execute.php', { 'token': g_token, 's': code } ).done(function(response) {
     if ( response.indexOf( "\n" + '-- loading --' + "\n" ) >= 0 ) {
       let text = response.replaceAll( "\n" + '-- loading --' + "\n", '' );
+      let idx = code.indexOf('-- load ');
+      if (idx >= 0) {
+        let tmp = code.substring(idx + 8);
+        idx = tmp.indexOf( ';' );
+        if (idx >= 0) {
+          tmp = tmp.substring(0, idx);
+        }
+        idx = tmp.indexOf( "\n" );
+        if (idx >= 0) {
+          tmp = tmp.substring(0, idx);
+        }
+        tmp = tmp.trim();
+        g_cur_file = tmp;
+      }
       let old_script = g_editor.doc.getValue();
       g_editor.doc.setValue(text);
-      $('#page-s .dtt-result').val( 'Script is loaded ...' + "\n\nOld scripts are as following:\n-----------\n" + old_script );
+      $('#page-s .dtt-result').val( g_refine_result('Script is loaded ...' + "\n\nOld scripts are as following:\n-----------\n" + old_script ) );
+      g_show_tab( g_cur_tab );
     } else {
-      $('#page-s .dtt-result').val(response);
+      $('#page-s .dtt-result').val(g_refine_result(response));
     }
   }).fail(function(jqXHR, textStatus, errorThrown) {
     let message = "\n" + 'Status Code: ' + jqXHR.status + "\n" + 'Status Text: ' + textStatus + "\n" + 'Error Thrown: ' + errorThrown + "\n" + 'Server Response: ' + jqXHR.responseText + "\n";
-    $('#page-s .dtt-result').val( message );    
+    $('#page-s .dtt-result').val( g_refine_result(message) );    
   });
 }
   </script>
@@ -365,6 +609,9 @@ function g_execute() {
 | -- save      |          | Save previous code to file. Does not execute script. Argument is relative path.                     |
 | -- cat       |          | Display script file. Does not execute script. Argument is relative path.                            |
 | -- open      | (-- \o)  | Open remote database. Arguments are host, port, username, password, database. Execute below script. |
+| -- username  |          | Set Testor's username. It is executed in client side.                                               |
+| -- password  |          | Set Testor's password. It is executed in client side.                                               |
+| -- proxy     |          | Set TestorProxy' connection command. It is executed in client side.                                 |
 +--------------+----------+-----------------------------------------------------------------------------------------------------+
 
   </div></div>
@@ -373,7 +620,7 @@ function g_execute() {
   <div id="page-s" class="dtt-cover" style="display: none">
   <div class="dtt-page-counter-cover"><div class="dtt-page-counter-inner"><div style="top: 5px" class="dtt-page-counter" onclick="g_show_page('o');"><div>&nbsp;O</div></div></div></div>
 
-  <div class="dtt-page-counter-cover"><div class="dtt-page-counter-inner"><div style="top: 5px" class="dtt-page-counter" onclick="g_show_page('o');"><div>&nbsp;O</div></div><div style="top: 35px" class="dtt-page-counter" onclick="g_show_page('s');"><div>&nbsp;S</div></div><div style="top: 85px" class="dtt-page-counter" onclick="g_execute();"><div>&nbsp;E</div></div></div></div>
+  <div class="dtt-page-counter-cover"><div class="dtt-page-counter-inner"><div style="top: 5px" class="dtt-page-counter" onclick="g_show_page('o');"><div>&nbsp;O</div></div><div style="top: 35px" class="dtt-page-counter" onclick="g_show_page('s');"><div>&nbsp;S</div></div><div style="top: 85px" class="dtt-page-counter" onclick="g_execute();"><div>&nbsp;E</div></div><div style="top: 135px" class="dtt-tab-button dtt-page-counter" onclick="g_show_tab('0');" id="dtt-tab-0"><div>&nbsp;0</div></div><div style="top: 165px" class="dtt-tab-button dtt-page-counter" onclick="g_show_tab('1');" id="dtt-tab-1"><div>&nbsp;1</div></div><div style="top: 195px" class="dtt-tab-button dtt-page-counter" onclick="g_show_tab('2');" id="dtt-tab-2"><div>&nbsp;2</div></div><div style="top: 225px" class="dtt-tab-button dtt-page-counter" onclick="g_show_tab('3');" id="dtt-tab-3"><div>&nbsp;3</div></div><div style="top: 255px" class="dtt-tab-button dtt-page-counter" onclick="g_show_tab('4');" id="dtt-tab-4"><div>&nbsp;4</div></div><div style="top: 285px" class="dtt-tab-button dtt-page-counter" onclick="g_show_tab('5');" id="dtt-tab-5"><div>&nbsp;5</div></div><div style="top: 315px" class="dtt-tab-button dtt-page-counter" onclick="g_show_tab('6');" id="dtt-tab-6"><div>&nbsp;6</div></div><div style="top: 345px" class="dtt-tab-button dtt-page-counter" onclick="g_show_tab('7');" id="dtt-tab-7"><div>&nbsp;7</div></div><div style="top: 375px" class="dtt-tab-button dtt-page-counter" onclick="g_show_tab('8');" id="dtt-tab-8"><div>&nbsp;8</div></div><div style="top: 405px" class="dtt-tab-button dtt-page-counter" onclick="g_show_tab('9');" id="dtt-tab-9"><div>&nbsp;9</div></div><div style="top: 455px" class="dtt-tab-button dtt-page-counter" onclick="g_unit_test();"><div>UT</div></div><div style="top: 485px" class="dtt-tab-button dtt-page-counter" onclick="g_def_unit_test();"><div>DUT</div></div></div></div>
   <div class="dtt-page"><div class="dtt-page-inner"><div class="dtt-script-cover"><textarea id="dtt-script" class="dtt-script"></textarea><textarea class="dtt-result"></textarea></div></div></div></div>
 
   <div id="page-u" class="dtt-cover" style="display: none">
