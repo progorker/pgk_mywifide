@@ -46,6 +46,11 @@ myWifide is ready to use on Testor Gifts such as:
 ------------------------------
 
 
+---| 2026.06.16 (4) |---
+
++ Replace 'script' textarea by code editor from 'CodeMirror' with syntax highlight, line numbers. Syntax highlight is available for supported commands which is not in MySQL client and 'help', 'source'.
+
+
 ---| 2026.06.16 (3) |---
 
 + Release: myWifide Lite v.0.0.1
@@ -85,6 +90,10 @@ myWifide is ready to use on Testor Gifts such as:
 ![](https://github.com/progorker/pgk_mywifide/blob/main/myWifide/shots/shot_008.png?raw=true)
 
 ![](https://github.com/progorker/pgk_mywifide/blob/main/myWifide/shots/shot_009.png?raw=true)
+
+![](https://github.com/progorker/pgk_mywifide/blob/main/myWifide/shots/shot_010.png?raw=true)
+
+![](https://github.com/progorker/pgk_mywifide/blob/main/myWifide/shots/shot_011.png?raw=true)
 
 ```
 ---------_--__--_------_------
