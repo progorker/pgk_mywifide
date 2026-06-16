@@ -10,6 +10,13 @@
 ==============================
 
 
+---| 2026.06.16 (5) |---
+
++ Add 'multiple script tabs' feature
++ Add 'Run Unit Test' feature
++ Release: myWifide v.0.0.1
+
+ 
 ---| 2026.06.16 (4) |---
 
 + Replace 'script' textarea by code editor from 'CodeMirror' with syntax highlight, line numbers. Syntax highlight is available for supported commands which is not in MySQL client and 'help', 'source'.
