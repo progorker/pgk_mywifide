@@ -10,6 +10,11 @@
 ==============================
 
 
+---| 2026.06.16 (4) |---
+
++ Replace 'script' textarea by code editor from 'CodeMirror' with syntax highlight, line numbers
+
+
 ---| 2026.06.16 (3) |---
 
 + Release: myWifide Lite v.0.0.1
