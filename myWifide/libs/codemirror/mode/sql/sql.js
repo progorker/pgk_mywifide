@@ -197,6 +197,45 @@ CodeMirror.defineMode("sql", function(config, parserConfig) {
       stream.eat('o');
       stream.eat(' ');
       return "keyword";
+    // '-- username' command
+    } else if (ch == '-' && stream.match(/^- username */) ) {
+      stream.eat('-');
+      stream.eat(' ');
+      stream.eat('u');
+      stream.eat('s');
+      stream.eat('e');
+      stream.eat('r');
+      stream.eat('n');
+      stream.eat('a');
+      stream.eat('m');
+      stream.eat('e');
+      stream.eat(' ');
+      return "keyword";
+    // '-- password' command
+    } else if (ch == '-' && stream.match(/^- password */) ) {
+      stream.eat('-');
+      stream.eat(' ');
+      stream.eat('p');
+      stream.eat('a');
+      stream.eat('s');
+      stream.eat('s');
+      stream.eat('w');
+      stream.eat('o');
+      stream.eat('r');
+      stream.eat('d');
+      stream.eat(' ');
+      return "keyword";
+    // '-- proxy' command
+    } else if (ch == '-' && stream.match(/^- proxy */) ) {
+      stream.eat('-');
+      stream.eat(' ');
+      stream.eat('p');
+      stream.eat('r');
+      stream.eat('o');
+      stream.eat('x');
+      stream.eat('y');
+      stream.eat(' ');
+      return "keyword";
     // 'call' command
     } else if (ch == 'c' && stream.match(/^all */) ) {
       stream.eat('a');
