@@ -236,6 +236,17 @@ CodeMirror.defineMode("sql", function(config, parserConfig) {
       stream.eat('y');
       stream.eat(' ');
       return "keyword";
+    // '-- suite' command
+    } else if (ch == '-' && stream.match(/^- suite */) ) {
+      stream.eat('-');
+      stream.eat(' ');
+      stream.eat('s');
+      stream.eat('u');
+      stream.eat('i');
+      stream.eat('t');
+      stream.eat('e');
+      stream.eat(' ');
+      return "keyword";
     // 'call' command
     } else if (ch == 'c' && stream.match(/^all */) ) {
       stream.eat('a');
