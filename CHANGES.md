@@ -14,6 +14,7 @@
 
 + Fix bug on '-- save' command
 + Fix bugs on client side commands
++ Add 'source version control' feature
 + Release: myWifide v.0.0.2
 
 
