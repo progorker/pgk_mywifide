@@ -10,6 +10,13 @@
 ==============================
 
 
+---| 2026.06.17 (1) |---
+
++ Fix bug on '-- save' command
++ Fix bugs on client side commands
++ Release: myWifide v.0.0.2
+
+
 ---| 2026.06.16 (5) |---
 
 + Add 'multiple script tabs' feature
