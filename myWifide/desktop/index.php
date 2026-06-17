@@ -416,7 +416,7 @@ function g_refine( sql ) {
 
     idx = ("\n" + sql + "\n").indexOf( "\n-- suite " );
     if ( idx >= 0 ) {
-      let tmp = ("\n" + sql + "\n").substring( idx + 13 );
+      let tmp = ("\n" + sql + "\n").substring( idx + 10 );
       idx = tmp.indexOf( ";" );
       if ( idx >= 0 ) {
         tmp = tmp.substring( 0, idx );
@@ -431,7 +431,7 @@ function g_refine( sql ) {
 
     idx = ("\n" + sql + "\n").indexOf( "\n-- proxy " );
     if ( idx >= 0 ) {
-      let tmp = ("\n" + sql + "\n").substring( idx + 13 );
+      let tmp = ("\n" + sql + "\n").substring( idx + 10 );
       idx = tmp.indexOf( ";" );
       if ( idx >= 0 ) {
         tmp = tmp.substring( 0, idx );
@@ -475,24 +475,26 @@ function g_unit_test() {
 }
 
 function g_def_unit_test() {
+  let code_tmp = g_refine( g_editor.doc.getValue() );
   let open_cmd = g_testor_proxy;
-  if ( g_testor_proxy == '_' || g_testor_proxy == '' ) {
+  if ( g_testor_proxy == '__' || g_testor_proxy == '' ) {
     open_cmd = prompt( "Please enter '-- open' command if you use proxy: " );
   }
   open_cmd = open_cmd.trim();
-  if ( open_cmd != '_' && open_cmd != '' ) {
+  if ( open_cmd != '__' && open_cmd != '' ) {
     g_testor_proxy = open_cmd;
   }
   let username = g_testor_username;
   let password = g_testor_password;
   let suite_code = g_testor_suite;
-  if ( g_testor_suite == '_' || g_testor_suite == '' ) {
+  if ( g_testor_suite == '_' || g_testor_suite == '' || g_testor_suite == '__' ) {
     suite_code = prompt( "Please enter test suite code: " );
     suite_code = suite_code.trim();
-    if ( suite_code == '_' || suite_code == '' ) return;
+    g_testor_suite = suite_code;
+    if ( suite_code == '_' || suite_code == '' || suite_code == '__' ) return;
   }
   let code = g_utp_mytestor();
-  if ( open_cmd != '' && open_cmd != '_' ) {
+  if ( open_cmd != '' && open_cmd != '_' && open_cmd != '__' ) {
     code = g_utp_mytestorproxy();
     code = code.replaceAll( '__OPEN_CMD__', open_cmd );
   }
@@ -612,6 +614,7 @@ function g_execute() {
 | -- username  |          | Set Testor's username. It is executed in client side.                                               |
 | -- password  |          | Set Testor's password. It is executed in client side.                                               |
 | -- proxy     |          | Set TestorProxy' connection command. It is executed in client side.                                 |
+| -- suite     |          | Set test suite code. It is executed in client side.                                                 |
 +--------------+----------+-----------------------------------------------------------------------------------------------------+
 
   </div></div>
