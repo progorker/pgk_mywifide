@@ -48,8 +48,12 @@ $g_config = array(
  'mytestor.database' => 'mytestor',
  'mytestor.command' => '/data/data/com.termux/files/usr/bin/mariadb',
  'mytestor.zip_cmd' => '/data/data/com.termux/files/usr/bin/zip',
+ 'mytestor.php_cmd' => '/data/data/com.termux/files/usr/bin/php',
  'mytestor.unlock_password' => 'homosapien',
  'mytestor.locking' => true,
+
+ 'svc.username' => 'mytestor',
+ 'svc.password' => 'rzutomqahegpnyx',
  
  'testor.username' => 'mytestor',
  'testor.password' => 'rzutomqahegpnyx'

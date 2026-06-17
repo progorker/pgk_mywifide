@@ -42,6 +42,30 @@ set_time_limit(0);
 
 header( 'Content-Type: text/plain' );
 
+function g_escape( $sql ) {
+  $sql = str_replace( "_", "_._us_._", $sql );
+  $sql = str_replace( "\n", "__nl__", $sql );
+  $sql = str_replace( "\r", "__cr__", $sql );
+  $sql = str_replace( "\t", "__tb__", $sql );
+  $sql = str_replace( "\\", "__sl__", $sql );
+  $sql = str_replace( '"', "__dq__", $sql );
+  $sql = str_replace( "'", "__sq__", $sql );
+  $sql = str_replace( "`", "__td__", $sql );
+  return $sql;
+}
+
+function g_unescape( $sql ) {
+  $sql = str_replace( "__nl__", "\n", $sql );
+  $sql = str_replace( "__cr__", "\r", $sql );
+  $sql = str_replace( "__tb__", "\t", $sql );
+  $sql = str_replace( "__sl__", "\\", $sql );
+  $sql = str_replace( "__dq__", '"', $sql );
+  $sql = str_replace( "__sq__", "'", $sql );
+  $sql = str_replace( "__td__", "`", $sql );
+  $sql = str_replace( "_._us_._", "_", $sql );
+  return $sql;
+}
+
 function copy_folder( $src_dir, $tag_dir ) {
   $text = trim( @shell_exec( "ls -1 $src_dir" ) . '' );
   $lines = explode( "\n", $text );
@@ -71,6 +95,18 @@ function copy_file( $src_file, $tag_file ) {
   @shell_exec( $cmd );
 }
 
+function g_ucode() {
+  $tmp_dir = __DIR__ . '/buffers';
+  @mkdir( $tmp_dir, 0777, true );
+  $code = substr( strrev( uniqid() ), 0, 4 );
+  $tag_dir = $tmp_dir . '/' . $code;
+  while ( is_dir( $tag_dir ) || is_file( $tag_dir ) ) {
+    $code = substr( strrev( uniqid() ), 0, 4 );
+    $tag_dir = $tmp_dir . '/' . $code;
+  }
+  return $code;
+}
+
 if ( strtolower( $_SERVER['REQUEST_METHOD'] ) === 'post' ) {
   if ( isset( $_FILES['zip'] ) ) {
     $tmp_file = $_FILES['zip']['tmp_name'];
@@ -81,7 +117,7 @@ if ( strtolower( $_SERVER['REQUEST_METHOD'] ) === 'post' ) {
       @mkdir( $tmp_dir, 0777, true );
       $zip_file = $tmp_dir . '/' . $filename;
       if ( move_uploaded_file( $tmp_file, $zip_file ) ) {
-        $code = substr( strrev( uniqid() ), 0, 4 );
+        $code = g_ucode();
         $cmd = "cd $tmp_dir && unzip $filename";
         @shell_exec( $cmd );
         @unlink( $zip_file );
@@ -106,6 +142,34 @@ if ( strtolower( $_SERVER['REQUEST_METHOD'] ) === 'post' ) {
       }
       $cmd = "rm -rf $tmp_dir";
       @shell_exec( $cmd );
+      $tag_dir = __DIR__ . '/buffers/' . $code;
+      $prj_file = $tag_dir . '/project.sql';
+      if ( is_file( $prj_file ) ) {
+        $prj_name = trim( str_replace( '.' . $fileext, '', $filename ) );
+        $prj_name = g_escape( $prj_name );
+        $prj_code = g_escape($code);
+        $text = @file_get_contents( $prj_file );
+        $find = "\nset @g_project_name = api_testor_unescape('";
+        $idx = strpos( "\n" . $text . "\n", $find );
+        if ( $idx === false ) {
+          $text .= "\nset @g_project_name = api_testor_unescape('$prj_name');\n";
+        }
+        $find = "\nset @g_project_code = api_testor_unescape('";
+        $idx = strpos( "\n" . $text . "\n", $find );
+        if ( $idx === false ) {
+          $text .= "\nset @g_project_code = api_testor_unescape('$prj_code');\n";
+        }
+        @file_put_contents( $prj_file, $text );
+      } else {
+        $prj_code = g_escape($code);
+        $prj_name = trim( str_replace( '.' . $fileext, '', $filename ) );
+        $prj_name = g_escape( $prj_name );
+        $text = <<<EOT
+set @g_project_code = api_testor_unescape('$prj_code');
+set @g_project_name = api_testor_unescape('$prj_name');
+EOT;
+        @file_put_contents( $prj_file, $text );
+      }
     } else {
       echo "\n", "[$fileext] file is not supported!", "\n";
     }

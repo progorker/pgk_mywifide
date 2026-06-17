@@ -41,7 +41,7 @@
 session_start();
 set_time_limit(0);
 
-global $g_config, $g_buffer_dir, $g_open_text, $g_source_text, $g_list_text, $g_remove_text, $g_workdir_text, $g_use_open, $g_open_cfg, $g_download_text, $g_load_text;
+global $g_config, $g_work_dir, $g_buffer_dir, $g_open_text, $g_source_text, $g_list_text, $g_remove_text, $g_workdir_text, $g_use_open, $g_open_cfg, $g_download_text, $g_load_text;
 
 require_once __DIR__ . '/config.php';
 
@@ -83,6 +83,7 @@ warnings\t(\W)\tShow warnings after every statement.
 -- username\t\tSet Testor's username. It is executed in client side.
 -- password\t\tSet Testor's password. It is executed in client side.
 -- proxy\t\tSet TestorProxy' connection command. It is executed in client side.
+-- suite\t\tSet test suite code. It is executed in client side.
 EOT;
   $rs = '';
   g_parse_results( $text, $rs );
@@ -588,7 +589,7 @@ function g_load_download( $sql ) {
 }
 
 function g_load_workdir( $sql ) {
-  global $g_buffer_dir, $g_workdir_text;
+  global $g_buffer_dir, $g_workdir_text, $g_work_dir;
   
   $nsql = '';
   $start = 0;
@@ -615,6 +616,7 @@ function g_load_workdir( $sql ) {
     $filename = str_replace( '..', '', $filename );
     $filename = trim( $filename );
     if ( is_dir( $g_buffer_dir . '/' . $filename ) ) {
+      $g_work_dir = $filename;
       $dir = $g_buffer_dir . '/' . $filename;
       $g_buffer_dir = $dir;
       $cat = "[DIR] Work" . "\n" . $filename;
@@ -788,26 +790,28 @@ function g_load_open( $sql ) {
 }
 
 function g_refine( $sql ) {
-  $sql = g_load_open( "\n" . $sql . "\n" );
-  $sql = g_load_workdir( "\n" . $sql . "\n" );
-  $sql = g_load_pattern( "\n" . $sql . "\n" );
-  $sql = str_replace( '-- source ', '-- _source_ ', $sql );
-  $sql = str_replace( '-- \\. ', '-- _source_ ', $sql );
-  
-  $sql = g_load_source( "\n" . $sql . "\n" );
-  while ( strpos( $sql, 'source ' ) !== false || strpos( $sql, '\\. ' ) !== false ) {
-    $sql = g_load_source( "\n" . $sql . "\n" );
+  $sql = g_load_save( "\n" . $sql . "\n" );
+  if ( strpos( "\n" . $sql . "\n", "\n-- loadsave --\n" ) === false ) {
+    $sql = g_load_open( "\n" . $sql . "\n" );
+    $sql = g_load_workdir( "\n" . $sql . "\n" );
+    $sql = g_load_pattern( "\n" . $sql . "\n" );
     $sql = str_replace( '-- source ', '-- _source_ ', $sql );
     $sql = str_replace( '-- \\. ', '-- _source_ ', $sql );
-  }
   
-  $sql = g_load_cat( "\n" . $sql . "\n" );
-  $sql = g_load_save( "\n" . $sql . "\n" );
-  $sql = g_load_list( "\n" . $sql . "\n" );
-  $sql = g_load_remove( "\n" . $sql . "\n" );
-  $sql = g_load_download( "\n" . $sql . "\n" );
-  $sql = g_load_load( "\n" . $sql . "\n" );
-  $sql = g_load_help( "\n" . $sql . "\n" );
+    $sql = g_load_source( "\n" . $sql . "\n" );
+    while ( strpos( $sql, 'source ' ) !== false || strpos( $sql, '\\. ' ) !== false ) {
+      $sql = g_load_source( "\n" . $sql . "\n" );
+      $sql = str_replace( '-- source ', '-- _source_ ', $sql );
+      $sql = str_replace( '-- \\. ', '-- _source_ ', $sql );
+    }
+  
+    $sql = g_load_cat( "\n" . $sql . "\n" );
+    $sql = g_load_list( "\n" . $sql . "\n" );
+    $sql = g_load_remove( "\n" . $sql . "\n" );
+    $sql = g_load_download( "\n" . $sql . "\n" );
+    $sql = g_load_load( "\n" . $sql . "\n" );
+    $sql = g_load_help( "\n" . $sql . "\n" );
+  }
   
   $sql = str_replace( ' source ', ' -- _source_ ', $sql );
   $sql = str_replace( 'source ', '-- _source_ ', $sql );
@@ -951,6 +955,7 @@ if ( !isset( $_SESSION['myWifide_'.$token] ) || $_SESSION['myWifide_'.$token] ==
 $g_buffer_dir = __DIR__ . '/buffers';
 @mkdir( $g_buffer_dir, 0777, true );
 
+$g_work_dir = './';
 $g_use_open = false;
 $g_load_text = '';
 $g_download_text = '';
@@ -992,6 +997,40 @@ if ( strpos( $sql, "\n-- loadcat --\n" ) !== false ||  strpos( $sql, "\n-- loads
 } else {
   $result .= "\n" . trim( g_mytestor_exec( $sql ) ) . "\n";
 }
+
+if ( strpos( "\n" . $sql . "\n", "call api_testor_finish(" ) !== false ||  strpos( "\n" . $sql . "\n", "call mytestorproxy.api_testor_finish(" ) !== false ) {
+  if ( strpos( $result, "| GREEN" ) !== false || strpos( $result, "| RED" ) !== false ) {
+    if ( strpos( "\n" . $sql . "\n", 'set @g_suite_code = ' ) !== false ) {
+      $idx = strpos( "\n" . $sql . "\n", 'set @g_suite_code = ' );
+      $tmp = substr( $sql, $idx + 20 );
+      $idx = strpos( $tmp, ';' );
+      if ( $idx !== false ) {
+        $tmp = substr( $tmp, 0, $idx );
+      }
+      $idx = strpos( $tmp, "\n" );
+      if ( $idx !== false ) {
+        $tmp = substr( $tmp, 0, $idx );
+      }
+      $tmp = trim( $tmp );
+      if ( $tmp[0] === "'" ) {
+        $tmp = substr( $tmp, 1 );
+      }
+      if ( $tmp[strlen($tmp) - 1] === "'" ) {
+        $tmp = substr( $tmp, 0, strlen( $tmp ) - 1 );
+      }
+      $suite_code = $tmp;
+      $suite_code = str_replace( "\n", '', $suite_code );
+      $suite_code = str_replace( "\r", '', $suite_code );
+      $suite_code = str_replace( '"', '', $suite_code );
+      $suite_code = str_replace( '\\', '', $suite_code );
+      if ( $suite_code !== '_' && $suite_code !== '' ) {
+        require_once __DIR__ . '/svc.php';
+        g_svc( $suite_code, $g_work_dir );
+      }
+    }
+  }
+}
+
 if ( strpos( $sql, "\n-- loadhelp --\n" ) !== false ) {
   $result = "\n" . trim( g_help() ) . "\n" . $result;
 }
