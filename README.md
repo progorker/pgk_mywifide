@@ -41,12 +41,20 @@ myWifide is ready to use on Testor Gifts such as:
 | -- username  |          | Set Testor's username. It is executed in client side.                                               |
 | -- password  |          | Set Testor's password. It is executed in client side.                                               |
 | -- proxy     |          | Set TestorProxy' connection command. It is executed in client side.                                 |
+| -- suite     |          | Set test suite code. It is executed in client side.                                                 |
 +--------------+----------+-----------------------------------------------------------------------------------------------------+
 
 
 ---------_--__--_------_------
        Latest Changes
 ------------------------------
+
+
+---| 2026.06.17 (1) |---
+
++ Fix bug on '-- save' command
++ Fix bugs on client side commands
++ Release: myWifide v.0.0.2
 
 
 ---| 2026.06.16 (5) |---
@@ -107,6 +115,8 @@ myWifide is ready to use on Testor Gifts such as:
 
 ![](https://github.com/progorker/pgk_mywifide/blob/main/myWifide/shots/shot_012.png?raw=true)
 
+![](https://github.com/progorker/pgk_mywifide/blob/main/myWifide/shots/shot_013.png?raw=true)
+
 ```
 ---------_--__--_------_------
      Supported Commands
@@ -148,6 +158,7 @@ myWifide is ready to use on Testor Gifts such as:
 | -- username  |          | Set Testor's username. It is executed in client side.                                               |
 | -- password  |          | Set Testor's password. It is executed in client side.                                               |
 | -- proxy     |          | Set TestorProxy' connection command. It is executed in client side.                                 |
+| -- suite     |          | Set test suite code. It is executed in client side.                                                 |
 +--------------+----------+-----------------------------------------------------------------------------------------------------+
 
 ```
