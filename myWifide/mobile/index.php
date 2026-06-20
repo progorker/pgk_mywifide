@@ -61,7 +61,7 @@ if ( ! check_http_headers_for_mobile() ) {
 ?>
 <html>
 <head>
-  <title>[ myWifide ] IDE @ Wi-Fi for MySQL</title>
+  <title>[ myWifide ] IDE @ Wi-Fi Network for MySQL</title>
   <script src="./../jquery-4.0.0.min.js"></script>
   <link rel="stylesheet" href="./../libs/codemirror/lib/codemirror.css">
   <link rel="stylesheet" href="./../libs/codemirror/theme/idea.css">
@@ -559,7 +559,7 @@ function g_execute() {
 =|_|===========|___/======================
       Testor - Unit Testing Platform
              ----- oOo ------
-    [ myWifide ] IDE @ Wi-Fi for MySQL
+[ myWifide ] IDE @ Wi-Fi Network for MySQL
 ==========================================
 
 
